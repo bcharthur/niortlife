@@ -1,0 +1,73 @@
+COMMANDES UTILES POUR DÉMARRER (Windows PowerShell)
+====================================================
+
+# ——— 0) ENV & PATH ———
+# S’assurer que Flutter (et son Dart embarqué) est en tête du PATH (session courante)
+$env:Path = "C:\tools\flutter\bin;C:\tools\flutter\bin\cache\dart-sdk\bin;$env:Path"
+# Si vous avez Chocolatey : recharge le PATH sans fermer la console
+refreshenv
+
+# Vérifications de base
+where flutter
+where dart
+flutter --version
+flutter doctor -v
+flutter doctor --android-licenses
+
+# ——— 1) ÉMULATEURS & APPAREILS ———
+flutter emulators                          # lister les AVD
+flutter emulators --launch Pixel_9_Pro_XL_API_35
+flutter devices                            # lister les devices détectés
+
+# ——— 2) LANCER L’APP ———
+flutter run -d emulator-5554               # sur l’émulateur Android en cours
+flutter run -d <deviceId>                  # ex. un téléphone physique Android
+
+# (Optionnel) Lancer sur le Web (attention : scan QR natif ≠ web)
+flutter run -d chrome
+
+# ——— 3) DÉPENDANCES & QUALITÉ ———
+flutter clean
+flutter pub get
+flutter analyze
+flutter format .
+flutter pub outdated                       # voir les mises à jour possibles
+# Mettre à jour prudemment (peut être breaking)
+# flutter pub upgrade --major-versions
+
+# ——— 4) GESTION DES PACKAGES ———
+# Ajouter d’un coup quelques deps utiles du projet (modifiez selon vos besoins)
+flutter pub add mobile_scanner fluttertoast qr_flutter cached_network_image flutter_svg google_fonts connectivity_plus sizer
+# Retirer un package devenu inutile / incompatible
+flutter pub remove qr_code_scanner
+# Verrouiller la version des lints pour éviter le conflit avec sizer ^3.x
+flutter pub add -d flutter_lints:^5.0.0
+
+# ——— 5) BUILDS ———
+flutter build apk --debug
+flutter build apk --release
+flutter build appbundle --release          # pour le Play Store (AAB)
+# Build Web (si nécessaire)
+flutter build web
+
+# ——— 6) ADB (debug Android) ———
+adb devices
+adb logcat                                # logs bas niveau Android
+# Si votre app consomme une API locale sur le PC hôte (ex: http://localhost:8000)
+adb reverse tcp:8000 tcp:8000
+
+# ——— 7) GRADLE / CACHE (en cas de souci) ———
+flutter pub cache repair
+# Nettoyage Gradle au niveau Android
+cd android; .\gradlew.bat clean; cd ..
+
+# ——— 8) CANAUX & MAJ FLUTTER ———
+flutter channel stable
+flutter upgrade
+
+# ——— 9) DIVERS ———
+# Générer un nouveau projet (si besoin)
+# flutter create mon_app
+
+# Afficher l’aide détaillée d’une commande
+# flutter help <commande>
