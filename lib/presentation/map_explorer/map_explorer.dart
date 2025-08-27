@@ -186,7 +186,7 @@ class _MapExplorerPageState extends State<MapExplorerPage> {
                   },
                   markers: filtered.map((p) {
                     final icon = _iconFor(p.category);
-                    final color = _colorFor(theme, p.category);
+                    final color = _colorFor(p.category, Theme.of(context).colorScheme);
                     return Marker(
                       point: p.position,
                       width: 44,
@@ -295,27 +295,37 @@ class _MapExplorerPageState extends State<MapExplorerPage> {
         return Icons.local_bar;
       case POICategory.restaurant:
         return Icons.restaurant;
-      case POICategory.busStop:
-        return Icons.directions_bus;
       case POICategory.event:
         return Icons.event;
-      case POICategory.discount:
+      case POICategory.deal:
+      case POICategory.discount: // alias
         return Icons.local_offer;
+      case POICategory.bus:
+        return Icons.directions_bus;
+      case POICategory.busStop:
+        return Icons.departure_board; // ou Icons.directions_bus_filled
+      case POICategory.other:
+        return Icons.place;
     }
   }
 
-  Color _colorFor(ThemeData theme, POICategory c) {
+
+  Color _colorFor(POICategory c, ColorScheme cs) {
     switch (c) {
       case POICategory.bar:
-        return AppTheme.warningLight; // orange
+        return cs.secondary;
       case POICategory.restaurant:
-        return AppTheme.errorLight; // red-ish
-      case POICategory.busStop:
-        return AppTheme.primaryLight; // blue
+        return cs.tertiary;
       case POICategory.event:
-        return const Color(0xFF7E57C2); // purple
+        return cs.primary;
+      case POICategory.deal:
       case POICategory.discount:
-        return AppTheme.secondaryLight; // green
+        return Colors.teal; // ou cs.secondaryContainer si tu préfères
+      case POICategory.bus:
+      case POICategory.busStop:
+        return Colors.indigo; // ou cs.primaryContainer
+      case POICategory.other:
+        return cs.outline;
     }
   }
 }
