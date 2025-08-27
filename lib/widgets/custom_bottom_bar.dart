@@ -256,16 +256,13 @@ class _CustomBottomBarState extends State<CustomBottomBar>
   }
 
   void _navigateToRoute(BuildContext context, String route) {
-    // Only navigate if not already on the current route
     final currentRoute = ModalRoute.of(context)?.settings.name;
-    if (currentRoute != route) {
-      Navigator.pushNamedAndRemoveUntil(
-        context,
-        route,
-            (route) => false,
-      );
-    }
+    if (currentRoute == route) return;
+
+    // Pousse la page au-dessus de l'actuelle -> le bouton back réapparaît
+    Navigator.pushNamed(context, route);
   }
+
 }
 
 /// Navigation item data class

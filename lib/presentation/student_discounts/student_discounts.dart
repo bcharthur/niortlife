@@ -236,6 +236,7 @@ class _StudentDiscountsState extends State<StudentDiscounts>
     final colorScheme = theme.colorScheme;
 
     return Scaffold(
+      extendBody: true,
       backgroundColor: colorScheme.surface,
       appBar: _buildAppBar(),
       body: Column(
@@ -423,13 +424,19 @@ class _StudentDiscountsState extends State<StudentDiscounts>
       );
     }
 
+    final bottomSafe = MediaQuery.of(context).padding.bottom;
+    // Laisse de l’air pour la bottom bar + le FAB étendu
+    final extraBottom = bottomSafe + kBottomNavigationBarHeight + 72;
+
     return RefreshIndicator(
       onRefresh: _refreshDiscounts,
       child: GridView.builder(
-        padding: EdgeInsets.all(2.w),
+        padding: EdgeInsets.fromLTRB(2.w, 2.w, 2.w, extraBottom),
         gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
           crossAxisCount: 2,
-          childAspectRatio: 0.75,
+          // ↓ Plus de hauteur par tuile (0.75 -> 0.66)
+          // (height = width / childAspectRatio)
+          childAspectRatio: 0.66,
           crossAxisSpacing: 2.w,
           mainAxisSpacing: 2.w,
         ),
@@ -445,6 +452,7 @@ class _StudentDiscountsState extends State<StudentDiscounts>
       ),
     );
   }
+
 
   Widget _buildQRScannerFAB() {
     return FloatingActionButton.extended(

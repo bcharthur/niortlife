@@ -1,9 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:sizer/sizer.dart';
-
 import '../../../core/app_export.dart';
 
-/// Widget representing a single discount card in the student discounts grid
 class DiscountCardWidget extends StatelessWidget {
   final Map<String, dynamic> discount;
   final VoidCallback onTap;
@@ -19,19 +17,39 @@ class DiscountCardWidget extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final colorScheme = theme.colorScheme;
+    final cs = theme.colorScheme;
+    final primary = AppTheme.lightTheme.primaryColor;
+
+    // ---- Mapping pour aligner les clés Home vs Page Réductions ----
+    final String imageUrl =
+    (discount['logo'] ?? discount['image'] ?? '') as String;
+    final String businessName =
+    (discount['businessName'] ?? '') as String;
+    final String category =
+    (discount['category'] ?? '') as String;
+
+    final String offerText = (discount['offer'] as String?) ??
+        (discount['percentage'] != null
+            ? '${discount['percentage']}% de réduction'
+            : '');
+
+    final String description =
+        (discount['description'] as String?) ??
+            (discount['offerDescription'] as String?) ??
+            '';
+
+    final String distanceLabel = _formatDistance(discount['distance']);
 
     return GestureDetector(
       onTap: onTap,
-      onLongPress: () => _showContextMenu(context),
+      onLongPress: onSave,
       child: Container(
-        margin: EdgeInsets.symmetric(horizontal: 2.w, vertical: 1.h),
         decoration: BoxDecoration(
-          color: colorScheme.surface,
-          borderRadius: BorderRadius.circular(12),
+          color: cs.surface,
+          borderRadius: BorderRadius.circular(16),
           boxShadow: [
             BoxShadow(
-              color: colorScheme.shadow.withValues(alpha: 0.1),
+              color: cs.shadow.withValues(alpha: 0.1),
               blurRadius: 8,
               offset: const Offset(0, 2),
             ),
@@ -40,317 +58,157 @@ class DiscountCardWidget extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // Business Image with Discount Badge
-            Stack(
-              children: [
-                ClipRRect(
-                  borderRadius:
-                      const BorderRadius.vertical(top: Radius.circular(12)),
-                  child: CustomImageWidget(
-                    imageUrl: discount["image"] as String,
-                    width: double.infinity,
-                    height: 20.h,
-                    fit: BoxFit.cover,
-                  ),
-                ),
-                // Discount Badge
-                Positioned(
-                  top: 8,
-                  right: 8,
-                  child: Container(
-                    padding:
-                        EdgeInsets.symmetric(horizontal: 2.w, vertical: 0.5.h),
-                    decoration: BoxDecoration(
-                      color: AppTheme.lightTheme.primaryColor,
-                      borderRadius: BorderRadius.circular(20),
-                    ),
-                    child: Text(
-                      "${discount["percentage"]}% OFF",
-                      style: theme.textTheme.labelSmall?.copyWith(
-                        color: Colors.white,
-                        fontWeight: FontWeight.w600,
-                      ),
+            // ---- Bandeau image (identique Home) ----
+            Container(
+              height: 12.h,
+              decoration: BoxDecoration(
+                borderRadius:
+                const BorderRadius.vertical(top: Radius.circular(16)),
+                color: cs.surfaceContainerHighest,
+              ),
+              child: Stack(
+                children: [
+                  ClipRRect(
+                    borderRadius:
+                    const BorderRadius.vertical(top: Radius.circular(16)),
+                    child: CustomImageWidget(
+                      imageUrl: imageUrl,
+                      width: double.infinity,
+                      height: double.infinity,
+                      fit: BoxFit.cover,
                     ),
                   ),
-                ),
-                // Student Verification Required Badge
-                if (discount["studentVerificationRequired"] as bool)
-                  Positioned(
-                    top: 8,
-                    left: 8,
-                    child: Container(
-                      padding: EdgeInsets.symmetric(
-                          horizontal: 1.5.w, vertical: 0.3.h),
-                      decoration: BoxDecoration(
-                        color: AppTheme.secondaryLight,
-                        borderRadius: BorderRadius.circular(12),
-                      ),
-                      child: Row(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          CustomIconWidget(
-                            iconName: 'school',
-                            color: Colors.white,
-                            size: 12,
+                  if (category.isNotEmpty)
+                    Positioned(
+                      top: 1.h,
+                      right: 2.w,
+                      child: Container(
+                        padding: EdgeInsets.symmetric(
+                            horizontal: 2.w, vertical: 0.5.h),
+                        decoration: BoxDecoration(
+                          color: cs.primary,
+                          borderRadius: BorderRadius.circular(8),
+                        ),
+                        child: Text(
+                          category,
+                          style: theme.textTheme.labelSmall?.copyWith(
+                            color: cs.onPrimary,
+                            fontWeight: FontWeight.w500,
                           ),
-                          SizedBox(width: 1.w),
-                          Text(
-                            "Étudiant",
-                            style: theme.textTheme.labelSmall?.copyWith(
-                              color: Colors.white,
-                              fontSize: 10.sp,
-                              fontWeight: FontWeight.w500,
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                  ),
-                // Age Restriction Badge
-                if (discount["ageRestriction"] as bool)
-                  Positioned(
-                    bottom: 8,
-                    left: 8,
-                    child: Container(
-                      padding: EdgeInsets.symmetric(
-                          horizontal: 1.5.w, vertical: 0.3.h),
-                      decoration: BoxDecoration(
-                        color: AppTheme.warningLight,
-                        borderRadius: BorderRadius.circular(12),
-                      ),
-                      child: Text(
-                        "18+",
-                        style: theme.textTheme.labelSmall?.copyWith(
-                          color: Colors.white,
-                          fontSize: 10.sp,
-                          fontWeight: FontWeight.w600,
                         ),
                       ),
                     ),
-                  ),
-              ],
-            ),
-            // Business Information
-            Padding(
-              padding: EdgeInsets.all(3.w),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  // Business Name
-                  Text(
-                    discount["businessName"] as String,
-                    style: theme.textTheme.titleSmall?.copyWith(
-                      fontWeight: FontWeight.w600,
-                    ),
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                  ),
-                  SizedBox(height: 0.5.h),
-                  // Offer Description
-                  Text(
-                    discount["offerDescription"] as String,
-                    style: theme.textTheme.bodySmall?.copyWith(
-                      color: colorScheme.onSurfaceVariant,
-                    ),
-                    maxLines: 2,
-                    overflow: TextOverflow.ellipsis,
-                  ),
-                  SizedBox(height: 1.h),
-                  // Distance and Validity
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      // Distance
-                      Row(
-                        children: [
-                          CustomIconWidget(
-                            iconName: 'location_on',
-                            color: colorScheme.onSurfaceVariant,
-                            size: 14,
-                          ),
-                          SizedBox(width: 1.w),
-                          Text(
-                            "${discount["distance"]}m",
-                            style: theme.textTheme.bodySmall?.copyWith(
-                              color: colorScheme.onSurfaceVariant,
-                              fontSize: 11.sp,
-                            ),
-                          ),
-                        ],
-                      ),
-                      // Validity Period
-                      Row(
-                        children: [
-                          CustomIconWidget(
-                            iconName: 'schedule',
-                            color: colorScheme.onSurfaceVariant,
-                            size: 14,
-                          ),
-                          SizedBox(width: 1.w),
-                          Text(
-                            _formatValidityPeriod(
-                                discount["validUntil"] as String),
-                            style: theme.textTheme.bodySmall?.copyWith(
-                              color: colorScheme.onSurfaceVariant,
-                              fontSize: 11.sp,
-                            ),
-                          ),
-                        ],
-                      ),
-                    ],
-                  ),
                 ],
               ),
             ),
-          ],
-        ),
-      ),
-    );
-  }
 
-  String _formatValidityPeriod(String validUntil) {
-    try {
-      final date = DateTime.parse(validUntil);
-      final now = DateTime.now();
-      final difference = date.difference(now).inDays;
+            // ---- Contenu (identique Home) ----
+            Expanded(
+              child: Padding(
+                padding: EdgeInsets.all(3.w),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    // Nom
+                    Text(
+                      businessName,
+                      style: theme.textTheme.titleSmall?.copyWith(
+                        fontWeight: FontWeight.w600,
+                      ),
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                    SizedBox(height: 0.5.h),
 
-      if (difference <= 0) {
-        return "Expiré";
-      } else if (difference == 1) {
-        return "1 jour";
-      } else if (difference <= 7) {
-        return "$difference jours";
-      } else {
-        return "${(difference / 7).floor()} sem.";
-      }
-    } catch (e) {
-      return validUntil;
-    }
-  }
+                    // Offre (pill)
+                    if (offerText.isNotEmpty)
+                      Container(
+                        padding: EdgeInsets.symmetric(
+                            horizontal: 2.w, vertical: 0.5.h),
+                        decoration: BoxDecoration(
+                          color: cs.secondary.withValues(alpha: 0.1),
+                          borderRadius: BorderRadius.circular(8),
+                        ),
+                        child: Text(
+                          offerText,
+                          style: theme.textTheme.labelMedium?.copyWith(
+                            color: cs.secondary,
+                            fontWeight: FontWeight.w600,
+                          ),
+                        ),
+                      ),
+                    if (offerText.isNotEmpty) SizedBox(height: 1.h),
 
-  void _showContextMenu(BuildContext context) {
-    showModalBottomSheet(
-      context: context,
-      backgroundColor: Colors.transparent,
-      builder: (context) => Container(
-        decoration: BoxDecoration(
-          color: Theme.of(context).colorScheme.surface,
-          borderRadius: const BorderRadius.vertical(top: Radius.circular(16)),
-        ),
-        padding: EdgeInsets.all(4.w),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            // Handle bar
-            Container(
-              width: 12.w,
-              height: 0.5.h,
-              decoration: BoxDecoration(
-                color: Theme.of(context).colorScheme.outline,
-                borderRadius: BorderRadius.circular(2),
+                    // Description
+                    Expanded(
+                      child: Text(
+                        description,
+                        style: theme.textTheme.bodySmall?.copyWith(
+                          color: cs.onSurfaceVariant,
+                        ),
+                        maxLines: 2,
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                    ),
+
+                    // Distance + QR preview
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Row(
+                          children: [
+                            CustomIconWidget(
+                              iconName: 'location_on',
+                              color: cs.onSurfaceVariant,
+                              size: 14,
+                            ),
+                            SizedBox(width: 1.w),
+                            Text(
+                              distanceLabel,
+                              style: theme.textTheme.labelSmall?.copyWith(
+                                color: cs.onSurfaceVariant,
+                              ),
+                            ),
+                          ],
+                        ),
+                        Container(
+                          padding: EdgeInsets.all(1.w),
+                          decoration: BoxDecoration(
+                            color: cs.outline.withValues(alpha: 0.1),
+                            borderRadius: BorderRadius.circular(4),
+                          ),
+                          child: CustomIconWidget(
+                            iconName: 'qr_code',
+                            color: primary,
+                            size: 16,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ],
+                ),
               ),
             ),
-            SizedBox(height: 3.h),
-            // Context Menu Options
-            _buildContextMenuItem(
-              context,
-              'Enregistrer dans le portefeuille',
-              'wallet',
-              onSave,
-            ),
-            _buildContextMenuItem(
-              context,
-              'Partager la réduction',
-              'share',
-              () => _shareDiscount(context),
-            ),
-            _buildContextMenuItem(
-              context,
-              'Obtenir l\'itinéraire',
-              'directions',
-              () => _getDirections(context),
-            ),
-            _buildContextMenuItem(
-              context,
-              'Appeler l\'entreprise',
-              'phone',
-              () => _callBusiness(context),
-            ),
-            _buildContextMenuItem(
-              context,
-              'Signaler un problème',
-              'report',
-              () => _reportIssue(context),
-            ),
-            SizedBox(height: 2.h),
           ],
         ),
       ),
     );
   }
 
-  Widget _buildContextMenuItem(
-    BuildContext context,
-    String title,
-    String iconName,
-    VoidCallback onTap,
-  ) {
-    return ListTile(
-      leading: CustomIconWidget(
-        iconName: iconName,
-        color: Theme.of(context).colorScheme.onSurface,
-        size: 24,
-      ),
-      title: Text(
-        title,
-        style: Theme.of(context).textTheme.bodyMedium,
-      ),
-      onTap: () {
-        Navigator.pop(context);
-        onTap();
-      },
-    );
-  }
-
-  void _shareDiscount(BuildContext context) {
-    // Share discount functionality
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text('Partage de la réduction "${discount["businessName"]}"'),
-        duration: const Duration(seconds: 2),
-      ),
-    );
-  }
-
-  void _getDirections(BuildContext context) {
-    // Get directions functionality
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content:
-            Text('Ouverture de l\'itinéraire vers ${discount["businessName"]}'),
-        duration: const Duration(seconds: 2),
-      ),
-    );
-  }
-
-  void _callBusiness(BuildContext context) {
-    // Call business functionality
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text('Appel de ${discount["businessName"]}'),
-        duration: const Duration(seconds: 2),
-      ),
-    );
-  }
-
-  void _reportIssue(BuildContext context) {
-    // Report issue functionality
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content:
-            Text('Signalement d\'un problème pour ${discount["businessName"]}'),
-        duration: const Duration(seconds: 2),
-      ),
-    );
+  // Distance: int (m) -> "320 m" / "0,7 km"
+  //            String  -> laissé tel quel
+  String _formatDistance(dynamic raw) {
+    if (raw is String) return raw;
+    if (raw is num) {
+      final m = raw.toDouble();
+      if (m >= 1000) {
+        final km = (m / 1000);
+        // 1 décimale, virgule française
+        final txt = (km.toStringAsFixed(1)).replaceAll('.', ',');
+        return '$txt km';
+      }
+      return '${m.toInt()} m';
+    }
+    return '';
   }
 }
