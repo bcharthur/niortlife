@@ -74,40 +74,56 @@ class _CustomBottomBarState extends State<CustomBottomBar>
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    final colorScheme = theme.colorScheme;
-
+    final colorScheme = Theme.of(context).colorScheme;
     final items = _getNavigationItems();
+
+    // ✅ padding bas “safe area” SANS le clavier
+    final safeBottom = MediaQuery.of(context).viewPadding.bottom;
+
+    // ✅ hauteur adaptée si labels + text scale
+    final hasLabels =
+        widget.showLabels && widget.variant != CustomBottomBarVariant.compact;
+    final textScale = MediaQuery.textScaleFactorOf(context);
+    final baseHeight = hasLabels ? 72.0 : 56.0;
+    final barHeight =
+        baseHeight + (textScale > 1.0 ? (textScale - 1.0) * 12.0 : 0.0);
 
     return Container(
       decoration: BoxDecoration(
         color: widget.backgroundColor ?? colorScheme.surface,
         boxShadow: [
           BoxShadow(
-            color: colorScheme.shadow.withValues(alpha: 0.1),
+            color: colorScheme.shadow.withOpacity(0.10),
             blurRadius: 8,
             offset: const Offset(0, -2),
           ),
         ],
       ),
+      // ⬇️ On évite d’ajouter le padding clavier
       child: SafeArea(
-        child: Container(
-          height: widget.variant == CustomBottomBarVariant.compact ? 60 : 80,
-          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 8),
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.spaceAround,
-            children: items.asMap().entries.map((entry) {
-              final index = entry.key;
-              final item = entry.value;
-              final isSelected = index == widget.currentIndex;
+        top: false,
+        left: false,
+        right: false,
+        bottom: false,
+        child: Padding(
+          padding: EdgeInsets.only(bottom: safeBottom),
+          child: SizedBox(
+            height: barHeight,
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceAround,
+              children: items.asMap().entries.map((entry) {
+                final index = entry.key;
+                final item = entry.value;
+                final isSelected = index == widget.currentIndex;
 
-              return _buildNavigationItem(
-                context,
-                item,
-                index,
-                isSelected,
-              );
-            }).toList(),
+                return _buildNavigationItem(
+                  context,
+                  item,
+                  index,
+                  isSelected,
+                );
+              }).toList(),
+            ),
           ),
         ),
       ),
@@ -115,13 +131,12 @@ class _CustomBottomBarState extends State<CustomBottomBar>
   }
 
   Widget _buildNavigationItem(
-    BuildContext context,
-    _NavigationItem item,
-    int index,
-    bool isSelected,
-  ) {
-    final theme = Theme.of(context);
-    final colorScheme = theme.colorScheme;
+      BuildContext context,
+      _NavigationItem item,
+      int index,
+      bool isSelected,
+      ) {
+    final colorScheme = Theme.of(context).colorScheme;
 
     final selectedColor = widget.selectedItemColor ?? colorScheme.primary;
     final unselectedColor =
@@ -136,20 +151,19 @@ class _CustomBottomBarState extends State<CustomBottomBar>
         child: AnimatedBuilder(
           animation: _animation,
           builder: (context, child) {
-            return Container(
-              padding: const EdgeInsets.symmetric(vertical: 8),
+            return Padding(
+              padding: const EdgeInsets.symmetric(vertical: 6),
               child: Column(
                 mainAxisSize: MainAxisSize.min,
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  // Icon with animation
                   AnimatedContainer(
                     duration: const Duration(milliseconds: 200),
                     curve: Curves.fastOutSlowIn,
-                    padding: EdgeInsets.all(isSelected ? 8 : 4),
+                    padding: EdgeInsets.all(isSelected ? 6 : 3),
                     decoration: BoxDecoration(
                       color: isSelected
-                          ? selectedColor.withValues(alpha: 0.1)
+                          ? selectedColor.withOpacity(0.1)
                           : Colors.transparent,
                       borderRadius: BorderRadius.circular(12),
                     ),
@@ -158,20 +172,20 @@ class _CustomBottomBarState extends State<CustomBottomBar>
                       color: isSelected ? selectedColor : unselectedColor,
                       size: widget.variant == CustomBottomBarVariant.compact
                           ? 20
-                          : 24,
+                          : 22,
                     ),
                   ),
 
-                  // Label with animation
+                  // Label
                   if (widget.showLabels &&
                       widget.variant != CustomBottomBarVariant.compact) ...[
-                    const SizedBox(height: 4),
+                    const SizedBox(height: 2),
                     AnimatedDefaultTextStyle(
                       duration: const Duration(milliseconds: 200),
                       style: GoogleFonts.inter(
                         fontSize: 12,
                         fontWeight:
-                            isSelected ? FontWeight.w600 : FontWeight.w400,
+                        isSelected ? FontWeight.w600 : FontWeight.w400,
                         color: isSelected ? selectedColor : unselectedColor,
                       ),
                       child: Text(
@@ -179,6 +193,7 @@ class _CustomBottomBarState extends State<CustomBottomBar>
                         textAlign: TextAlign.center,
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,
+                        softWrap: false,
                       ),
                     ),
                   ],
@@ -186,7 +201,7 @@ class _CustomBottomBarState extends State<CustomBottomBar>
                   // Active indicator
                   if (isSelected &&
                       widget.variant == CustomBottomBarVariant.indicator) ...[
-                    const SizedBox(height: 4),
+                    const SizedBox(height: 2),
                     Container(
                       width: 4,
                       height: 4,
@@ -240,7 +255,6 @@ class _CustomBottomBarState extends State<CustomBottomBar>
     ];
   }
 
-
   void _navigateToRoute(BuildContext context, String route) {
     // Only navigate if not already on the current route
     final currentRoute = ModalRoute.of(context)?.settings.name;
@@ -248,7 +262,7 @@ class _CustomBottomBarState extends State<CustomBottomBar>
       Navigator.pushNamedAndRemoveUntil(
         context,
         route,
-        (route) => false,
+            (route) => false,
       );
     }
   }
@@ -312,8 +326,7 @@ class CustomFloatingBottomBar extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    final colorScheme = theme.colorScheme;
+    final colorScheme = Theme.of(context).colorScheme;
 
     return Container(
       margin: const EdgeInsets.all(16),
@@ -325,7 +338,7 @@ class CustomFloatingBottomBar extends StatelessWidget {
             borderRadius: BorderRadius.circular(16),
             boxShadow: [
               BoxShadow(
-                color: colorScheme.shadow.withValues(alpha: 0.15),
+                color: colorScheme.shadow.withOpacity(0.15),
                 blurRadius: 12,
                 offset: const Offset(0, 4),
               ),
