@@ -5,6 +5,7 @@ import '../presentation/home_dashboard/home_dashboard.dart';
 import '../presentation/event_detail/event_detail.dart';
 import '../presentation/transport_hub/transport_hub.dart';
 import '../presentation/student_discounts/student_discounts.dart';
+import '../presentation/map_explorer/map_explorer.dart';
 
 class AppRoutes {
   // TODO: Add your routes here
@@ -15,6 +16,7 @@ class AppRoutes {
   static const String eventDetail = '/event-detail';
   static const String transportHub = '/transport-hub';
   static const String studentDiscounts = '/student-discounts';
+  static const String mapExplorer = '/map-explorer';
 
   static Map<String, WidgetBuilder> routes = {
     initial: (context) => const NightlifeGuide(),
@@ -24,6 +26,7 @@ class AppRoutes {
     eventDetail: (context) => const EventDetail(),
     transportHub: (context) => const TransportHub(),
     studentDiscounts: (context) => const StudentDiscounts(),
+    mapExplorer: (context) => const MapExplorerPage(),
     // TODO: Add your other routes here
   };
 }
