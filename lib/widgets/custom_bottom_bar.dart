@@ -237,6 +237,12 @@ class _CustomBottomBarState extends State<CustomBottomBar>
         label: 'Sorties',
         route: '/nightlife-guide',
       ),
+      _NavigationItem(
+        icon: Icons.map_outlined,
+        selectedIcon: Icons.map,
+        label: 'Carte',
+        route: '/map-explorer',
+      ),
     ];
   }
 

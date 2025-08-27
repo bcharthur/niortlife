@@ -134,64 +134,51 @@ class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
   }
 
   List<Widget>? _buildActions(BuildContext context, Color foregroundColor) {
-    if (actions != null) return actions;
+    // 1) Actions par défaut selon la variante
+    final List<Widget> built = [];
 
-    // Default actions based on variant
     switch (variant) {
       case CustomAppBarVariant.search:
-        return [
+        built.addAll([
           IconButton(
-            icon: Icon(
-              Icons.search,
-              color: foregroundColor,
-            ),
+            icon: Icon(Icons.search, color: foregroundColor),
             onPressed: () {
-              // Implement search functionality
-              showSearch(
-                context: context,
-                delegate: _CustomSearchDelegate(),
-              );
+              showSearch(context: context, delegate: _CustomSearchDelegate());
             },
             tooltip: 'Rechercher',
           ),
           IconButton(
-            icon: Icon(
-              Icons.filter_list,
-              color: foregroundColor,
-            ),
-            onPressed: () {
-              // Show filter bottom sheet
-              _showFilterBottomSheet(context);
-            },
+            icon: Icon(Icons.filter_list, color: foregroundColor),
+            onPressed: () => _showFilterBottomSheet(context),
             tooltip: 'Filtrer',
           ),
-        ];
+        ]);
+        break;
+
       case CustomAppBarVariant.standard:
-        return [
+        built.add(
           IconButton(
-            icon: Icon(
-              Icons.notifications_outlined,
-              color: foregroundColor,
-            ),
+            icon: Icon(Icons.notifications_outlined, color: foregroundColor),
             onPressed: () {
-              // Navigate to notifications or show notification panel
               ScaffoldMessenger.of(context).showSnackBar(
-                SnackBar(
-                  content: Text(
-                    'Notifications - Fonctionnalité à venir',
-                    style: GoogleFonts.inter(),
-                  ),
-                  duration: const Duration(seconds: 2),
-                ),
+                SnackBar(content: Text('Notifications - Fonctionnalité à venir')),
               );
             },
             tooltip: 'Notifications',
           ),
-        ];
+        );
+        break;
+
       default:
-        return null;
+        break;
     }
+
+    // 2) Actions supplémentaires fournies par l'appelant (si présentes)
+    if (actions != null) built.addAll(actions!);
+
+    return built.isEmpty ? null : built;
   }
+
 
   void _showFilterBottomSheet(BuildContext context) {
     showModalBottomSheet(

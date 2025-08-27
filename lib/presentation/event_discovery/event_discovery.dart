@@ -10,6 +10,7 @@ import './widgets/event_card_widget.dart';
 import './widgets/filter_bottom_sheet_widget.dart';
 import './widgets/filter_chip_widget.dart';
 import './widgets/search_bar_widget.dart';
+import '../../widgets/actions/map_action_button.dart';
 
 class EventDiscovery extends StatefulWidget {
   const EventDiscovery({super.key});
@@ -302,10 +303,14 @@ class _EventDiscoveryState extends State<EventDiscovery>
 
     return Scaffold(
       backgroundColor: colorScheme.surface,
-      appBar: const CustomAppBar(
+      appBar: CustomAppBar(
         title: 'Événements',
         variant: CustomAppBarVariant.search,
+        actions: const [
+          MapActionButton(), // 👉 ouvre la carte
+        ],
       ),
+
       body: Column(
         children: [
           // Search Bar
