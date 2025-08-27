@@ -1,3 +1,4 @@
+
 import 'package:flutter/material.dart';
 import 'package:sizer/sizer.dart';
 import 'package:google_fonts/google_fonts.dart';
@@ -5,10 +6,6 @@ import 'package:google_fonts/google_fonts.dart';
 import '../../core/app_export.dart';
 import '../../theme/app_theme.dart';
 import '../../widgets/custom_icon_widget.dart';
-import './widgets/filter_bottom_sheet_widget.dart';
-import './widgets/safety_mode_widget.dart';
-import './widgets/venue_card_widget.dart';
-import './widgets/venue_context_menu_widget.dart';
 import 'widgets/filter_bottom_sheet_widget.dart';
 import 'widgets/safety_mode_widget.dart';
 import 'widgets/venue_card_widget.dart';
@@ -29,7 +26,13 @@ class _NightlifeGuideState extends State<NightlifeGuide>
   bool _isLoading = false;
   bool _showOpenOnly = false;
   bool _safetyModeActive = false;
-  bool _ageVerified = true;
+
+  /// Désactive la vérif d'âge par défaut. Passe à `false` pour réactiver.
+  bool _ageVerified = false;
+
+  /// Empêche l'ouverture multiple de la modale.
+  bool _ageDialogShown = false;
+
   double _locationRadius = 5.0;
   String _currentTime = '';
   OverlayEntry? _contextMenuOverlay;
@@ -48,7 +51,7 @@ class _NightlifeGuideState extends State<NightlifeGuide>
       "id": 1,
       "name": "Le Zinc",
       "image":
-          "https://images.unsplash.com/photo-1514933651103-005eec06c04b?fm=jpg&q=60&w=3000&ixlib=rb-4.0.3",
+      "https://images.unsplash.com/photo-1514933651103-005eec06c04b?fm=jpg&q=60&w=3000&ixlib=rb-4.0.3",
       "address": "12 Rue Saint-Jean, Niort",
       "hours": "18h00 - 02h00",
       "isOpen": true,
@@ -63,7 +66,7 @@ class _NightlifeGuideState extends State<NightlifeGuide>
       "id": 2,
       "name": "Club Atmosphere",
       "image":
-          "https://images.unsplash.com/photo-1571266028243-d220c9c3b2d2?fm=jpg&q=60&w=3000&ixlib=rb-4.0.3",
+      "https://images.unsplash.com/photo-1571266028243-d220c9c3b2d2?fm=jpg&q=60&w=3000&ixlib=rb-4.0.3",
       "address": "25 Avenue de Paris, Niort",
       "hours": "22h00 - 05h00",
       "isOpen": true,
@@ -78,7 +81,7 @@ class _NightlifeGuideState extends State<NightlifeGuide>
       "id": 3,
       "name": "Pub O'Malley's",
       "image":
-          "https://images.unsplash.com/photo-1572116469696-31de0f17cc34?fm=jpg&q=60&w=3000&ixlib=rb-4.0.3",
+      "https://images.unsplash.com/photo-1572116469696-31de0f17cc34?fm=jpg&q=60&w=3000&ixlib=rb-4.0.3",
       "address": "8 Place de la Brèche, Niort",
       "hours": "17h00 - 01h00",
       "isOpen": false,
@@ -93,7 +96,7 @@ class _NightlifeGuideState extends State<NightlifeGuide>
       "id": 4,
       "name": "Lounge 79",
       "image":
-          "https://images.unsplash.com/photo-1566417713940-fe7c737a9ef2?fm=jpg&q=60&w=3000&ixlib=rb-4.0.3",
+      "https://images.unsplash.com/photo-1566417713940-fe7c737a9ef2?fm=jpg&q=60&w=3000&ixlib=rb-4.0.3",
       "address": "79 Rue Ricard, Niort",
       "hours": "19h00 - 02h30",
       "isOpen": true,
@@ -108,7 +111,7 @@ class _NightlifeGuideState extends State<NightlifeGuide>
       "id": 5,
       "name": "La Discothèque",
       "image":
-          "https://images.unsplash.com/photo-1493225457124-a3eb161ffa5f?fm=jpg&q=60&w=3000&ixlib=rb-4.0.3",
+      "https://images.unsplash.com/photo-1493225457124-a3eb161ffa5f?fm=jpg&q=60&w=3000&ixlib=rb-4.0.3",
       "address": "15 Boulevard Main, Niort",
       "hours": "23h00 - 06h00",
       "isOpen": true,
@@ -140,7 +143,10 @@ class _NightlifeGuideState extends State<NightlifeGuide>
     ));
 
     _updateCurrentTime();
-    // _checkAgeVerification();
+
+    // Affiche une seule modale si _ageVerified == false
+    _checkAgeVerification();
+
     _filteredVenues = List.from(_venues);
   }
 
@@ -155,16 +161,18 @@ class _NightlifeGuideState extends State<NightlifeGuide>
     final now = DateTime.now();
     setState(() {
       _currentTime =
-          '${now.hour.toString().padLeft(2, '0')}:${now.minute.toString().padLeft(2, '0')}';
+      '${now.hour.toString().padLeft(2, '0')}:${now.minute.toString().padLeft(2, '0')}';
     });
   }
 
   void _checkAgeVerification() {
-    // if (!_ageVerified) {
-    //   WidgetsBinding.instance.addPostFrameCallback((_) {
-    //     _showAgeVerificationDialog();
-    //   });
-    // }
+    if (!_ageVerified && !_ageDialogShown) {
+      _ageDialogShown = true;
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (!mounted) return;
+        _showAgeVerificationDialog();
+      });
+    }
   }
 
   void _showAgeVerificationDialog() {
@@ -211,6 +219,7 @@ class _NightlifeGuideState extends State<NightlifeGuide>
           TextButton(
             onPressed: () {
               Navigator.pop(context);
+              _ageDialogShown = false;
               Navigator.pushReplacementNamed(context, '/home-dashboard');
             },
             child: Text(
@@ -225,6 +234,7 @@ class _NightlifeGuideState extends State<NightlifeGuide>
               setState(() {
                 _ageVerified = true;
               });
+              _ageDialogShown = false;
               Navigator.pop(context);
             },
             child: Text(
@@ -241,33 +251,6 @@ class _NightlifeGuideState extends State<NightlifeGuide>
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final colorScheme = theme.colorScheme;
-
-    // if (!_ageVerified) {
-    //   return Scaffold(
-    //     backgroundColor: colorScheme.surface,
-    //     body: Center(
-    //       child: Column(
-    //         mainAxisAlignment: MainAxisAlignment.center,
-    //         children: [
-    //           CustomIconWidget(
-    //             iconName: 'nightlife',
-    //             color: colorScheme.primary,
-    //             size: 64,
-    //           ),
-    //           SizedBox(height: 4.h),
-    //           Text(
-    //             'Vérification en cours...',
-    //             style: GoogleFonts.inter(
-    //               fontSize: 18.sp,
-    //               fontWeight: FontWeight.w500,
-    //               color: colorScheme.onSurface,
-    //             ),
-    //           ),
-    //         ],
-    //       ),
-    //     ),
-    //   );
-    // }
 
     return Scaffold(
       backgroundColor: colorScheme.surface,
@@ -537,7 +520,7 @@ class _NightlifeGuideState extends State<NightlifeGuide>
       String icon, String label, String route, bool isSelected) {
     final colorScheme = Theme.of(context).colorScheme;
     final color =
-        isSelected ? colorScheme.primary : colorScheme.onSurfaceVariant;
+    isSelected ? colorScheme.primary : colorScheme.onSurfaceVariant;
 
     return GestureDetector(
       onTap: () {
@@ -605,8 +588,7 @@ class _NightlifeGuideState extends State<NightlifeGuide>
 
         // Crowd size filter
         final crowdSizes = _filters['crowdSizes'] as List<String>;
-        if (crowdSizes.isNotEmpty &&
-            !crowdSizes.contains(venue["crowdLevel"])) {
+        if (crowdSizes.isNotEmpty && !crowdSizes.contains(venue["crowdLevel"])) {
           return false;
         }
 
