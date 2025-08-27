@@ -237,14 +237,9 @@ class _CustomBottomBarState extends State<CustomBottomBar>
         label: 'Sorties',
         route: '/nightlife-guide',
       ),
-      _NavigationItem(
-        icon: Icons.map_outlined,
-        selectedIcon: Icons.map,
-        label: 'Carte',
-        route: '/map-explorer',
-      ),
     ];
   }
+
 
   void _navigateToRoute(BuildContext context, String route) {
     // Only navigate if not already on the current route

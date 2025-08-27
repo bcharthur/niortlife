@@ -7,6 +7,8 @@ import './widgets/happening_tonight_widget.dart';
 import './widgets/location_header_widget.dart';
 import './widgets/student_discounts_widget.dart';
 import './widgets/transport_widget.dart';
+import './widgets/home_map_card_widget.dart';
+
 
 class HomeDashboard extends StatefulWidget {
   const HomeDashboard({super.key});
@@ -71,6 +73,21 @@ class _HomeDashboardState extends State<HomeDashboard>
                     _buildWelcomeSection(),
 
                     SizedBox(height: 3.h),
+
+                    // Espace
+                    SizedBox(height: 1.5.h),
+
+// Mini carte (aperçu) avec bouton plein écran
+                    Padding(
+                      padding: EdgeInsets.symmetric(horizontal: 4.w),
+                      child: const HomeMapCardWidget(
+                        fullBleed: true,
+                        height: 280, // ajuste à 300 si tu veux
+                      ),
+                    ),
+
+// Espace
+                    SizedBox(height: 2.h),
 
                     // Happening Tonight
                     const HappeningTonightWidget(),
