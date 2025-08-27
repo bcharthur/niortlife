@@ -4,6 +4,7 @@ import 'package:sizer/sizer.dart';
 
 import 'core/app_export.dart';
 import 'widgets/custom_error_widget.dart';
+import 'core/navigation/app_router.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -42,7 +43,7 @@ class MyApp extends StatelessWidget {
         },
         // 🚨 END CRITICAL SECTION
         debugShowCheckedModeBanner: false,
-        routes: AppRoutes.routes,
+        onGenerateRoute: AppRouter.onGenerateRoute,
         initialRoute: AppRoutes.initial,
       );
     });
