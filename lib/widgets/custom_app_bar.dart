@@ -95,7 +95,7 @@ class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
       foregroundColor: effectiveForegroundColor,
       elevation: effectiveElevation,
       shadowColor: theme.shadowColor,
-      leading: _buildLeading(context, effectiveForegroundColor),
+      leading: BackButton(onPressed: () => Navigator.maybePop(context)),
       actions: _buildActions(context, effectiveForegroundColor),
       bottom: bottom,
       shape: variant == CustomAppBarVariant.transparent

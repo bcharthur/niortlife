@@ -6,6 +6,8 @@ import './widgets/journey_planner_widget.dart';
 import './widgets/live_departures_widget.dart';
 import './widgets/location_header_widget.dart';
 import './widgets/nearby_stops_widget.dart';
+import '../../widgets/custom_bottom_bar.dart';
+
 
 class TransportHub extends StatefulWidget {
   const TransportHub({super.key});
@@ -929,6 +931,26 @@ class _TransportHubState extends State<TransportHub>
     );
   }
 
+  void _onBottomNavTap(int index) {
+    switch (index) {
+      case 0:
+        Navigator.pushNamedAndRemoveUntil(context, '/home-dashboard', (r) => false);
+        break;
+      case 1:
+        Navigator.pushNamedAndRemoveUntil(context, '/event-discovery', (r) => false);
+        break;
+      case 2:
+        Navigator.pushNamedAndRemoveUntil(context, '/student-discounts', (r) => false);
+        break;
+      case 3:
+      // déjà sur Transport
+        break;
+      case 4:
+        Navigator.pushNamedAndRemoveUntil(context, '/nightlife-guide', (r) => false);
+        break;
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -946,6 +968,25 @@ class _TransportHubState extends State<TransportHub>
                 pinned: false,
                 backgroundColor: AppTheme.lightTheme.colorScheme.surface,
                 elevation: 0,
+
+                // ⬇️ Ajout de la flèche retour
+                leading: IconButton(
+                  tooltip: 'Retour',
+                  icon: const Icon(Icons.arrow_back),
+                  color: AppTheme.lightTheme.primaryColor,
+                  onPressed: () {
+                    if (Navigator.of(context).canPop()) {
+                      Navigator.of(context).maybePop();
+                    } else {
+                      Navigator.of(context).pushNamedAndRemoveUntil(
+                        '/home-dashboard',
+                            (route) => false,
+                      );
+                    }
+                  },
+                ),
+
+
                 title: Row(
                   children: [
                     CustomIconWidget(
@@ -992,6 +1033,7 @@ class _TransportHubState extends State<TransportHub>
                 ],
               ),
 
+
               // Location Header
               SliverToBoxAdapter(
                 child: LocationHeaderWidget(
@@ -1036,6 +1078,10 @@ class _TransportHubState extends State<TransportHub>
             ],
           ),
         ),
+      ),
+      bottomNavigationBar: CustomBottomBar(
+        currentIndex: 3, // l’onglet Transport
+        onTap: _onBottomNavTap,
       ),
     );
   }
